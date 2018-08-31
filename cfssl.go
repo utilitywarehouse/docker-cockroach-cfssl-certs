@@ -2,8 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"strings"
-
 	"github.com/cloudflare/cfssl/api/client"
 	"github.com/cloudflare/cfssl/auth"
 	"github.com/cloudflare/cfssl/cli/genkey"
@@ -22,9 +20,7 @@ func newClientCSR(user string) *csr.CertificateRequest {
 	}
 }
 
-func newNodeCSR(addresses string) *csr.CertificateRequest {
-	hosts := strings.Split(addresses, ",")
-
+func newNodeCSR(hosts []string) *csr.CertificateRequest {
 	return &csr.CertificateRequest{
 		CN:         "node",
 		Hosts:      hosts,
@@ -74,7 +70,7 @@ func createCertificateAndKey(
 		cert, key = nil, nil
 		return
 	}
-	return cert, key, err
+	return key, cert, err
 }
 
 func getCACertificate(address string) (cert []byte, err error) {

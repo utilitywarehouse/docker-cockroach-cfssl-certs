@@ -7,10 +7,9 @@ VERSION := $(shell git rev-parse HEAD)
 GIT_SUMMARY := $(shell git describe --tags --dirty --always)
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
-NAMESPACE := partner
 SERVICE := $(shell basename $(shell pwd))
 UW_DOCKER_REGISTRY := registry.uw.systems
-DOCKER_IMAGE_NAME := $(UW_DOCKER_REGISTRY)/$(NAMESPACE)/$(SERVICE)
+DOCKER_IMAGE_NAME := $(UW_DOCKER_REGISTRY)/$(SERVICE)
 
 LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 

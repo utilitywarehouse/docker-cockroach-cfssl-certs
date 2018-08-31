@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var version = "replaced by `make fast`"
+var version = "replaced by `make static`"
 
 var flags = []cli.Flag{
 	cli.StringFlag{
@@ -26,7 +26,7 @@ var flags = []cli.Flag{
 		EnvVar: "USER",
 		Usage:  "User name for client certificate",
 	},
-	cli.StringFlag{
+	cli.StringSliceFlag{
 		Name:  "hosts",
 		Usage: "Coma separated list of host addresses for node certificate",
 	},
@@ -55,13 +55,13 @@ var flags = []cli.Flag{
 
 func checkRequired(c *cli.Context) error {
 	if c.String("ca-auth-key") == "" {
-		return errors.New("\"ca-auth-key\" is required")
+		return errors.New(`"ca-auth-key" is required"`)
 	}
 	if c.String("ca-profile") == "" {
-		return errors.New("\"ca-profile\" is required")
+		return errors.New(`"ca-profile" is required`)
 	}
 	if c.String("ca-address") == "" {
-		return errors.New("\"ca-address\" is required")
+		return errors.New(`"ca-address" is required`)
 	}
 
 	return nil
@@ -88,7 +88,7 @@ func action(c *cli.Context) error {
 		keyFileName = fmt.Sprintf("client.%s.key", user)
 		certFileName = fmt.Sprintf("client.%s.crt", user)
 	case "node":
-		req = newNodeCSR(c.String("hosts"))
+		req = newNodeCSR(c.StringSlice("hosts"))
 		keyFileName = "node.key"
 		certFileName = "node.crt"
 	default:
