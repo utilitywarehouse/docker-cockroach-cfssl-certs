@@ -16,25 +16,28 @@ used as a common name in the certificate.
 ```
   initContainers:
   - name: init-certs
-    image: registry.uw.systems/cockroach-cfssl-certs:latest
+    image: registry.uw.systems/cockroach-cfssl-certs:initial
     imagePullPolicy: Always
-    args: []
+    command: ["cockroach-certs"]
     env:
-    - name:  CERTIFICATE_TYPE
+    - name: CERTIFICATE_TYPE
       value: "client"
-    - name:  USER
+    - name: USER
       value: "root"
-    - name:  CERTS_DIR
+    - name: CERTS_DIR
       value: "/cockroach-certs"
-    - name:  CA_PROFILE
+    - name: CA_PROFILE
       value: "client"
-    - name:  CA_ADDRESS
-      value: "certificate-authority:8080"
+    - name: CA_ADDRESS
+      valueFrom:
+        configMapKeyRef:
+          name: config
+          key: ca.endpoint
     - name: CA_AUTH_KEY
       valueFrom:
         secretKeyRef:
           key: auth.key
-          name: cfssl-auth-key
+          name: ca-auth-key
     volumeMounts:
     - name: client-certs
       mountPath: /cockroach-certs
@@ -43,25 +46,36 @@ used as a common name in the certificate.
 ```
   initContainers:
   - name: init-certs
-    image: registry.uw.systems/cockroach-cfssl-certs:latest
+    image: registry.uw.systems/cockroach-cfssl-certs:initial
     imagePullPolicy: Always
-    args:
-    - "--hosts"
-    - "localhost,127.0.0.1,$(hostname -f),$(hostname -f|cut -f 1-2 -d '.'),cockroachdb-public,cockroachdb-public.$(hostname -f|cut -f 3- -d '.')"
+    command:
+    - "sh"
+    - "-c"
+    - >
+      cockroach-certs
+      --host=localhost
+      --host=127.0.0.1
+      --host=$(hostname -f)
+      --host=$(hostname -f|cut -f 1-2 -d '.')
+      --host=cockroachdb-public
+      --host=cockroachdb-public.$(hostname -f|cut -f 3- -d '.')
     env:
-    - name:  CERTIFICATE_TYPE
+    - name: CERTIFICATE_TYPE
       value: "node"
-    - name:  CERTS_DIR
+    - name: CERTS_DIR
       value: "/cockroach-certs"
-    - name:  CA_PROFILE
-      value: "client"
-    - name:  CA_ADDRESS
-      value: "certificate-authority:8080"
+    - name: CA_PROFILE
+      value: "client-server"
+    - name: CA_ADDRESS
+      valueFrom:
+        configMapKeyRef:
+          name: config
+          key: ca.endpoint
     - name: CA_AUTH_KEY
       valueFrom:
         secretKeyRef:
           key: auth.key
-          name: cfssl-auth-key
+          name: ca-auth-key
     volumeMounts:
     - name: certs
       mountPath: /cockroach-certs

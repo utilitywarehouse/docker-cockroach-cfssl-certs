@@ -27,8 +27,8 @@ var flags = []cli.Flag{
 		Usage:  "User name for client certificate",
 	},
 	cli.StringSliceFlag{
-		Name:  "hosts",
-		Usage: "Coma separated list of host addresses for node certificate",
+		Name:  "host",
+		Usage: `"--host=address1 --host=address2" One or more host addresses for the node certificate.`,
 	},
 	cli.StringFlag{
 		Name:   "ca-auth-key",
@@ -88,7 +88,7 @@ func action(c *cli.Context) error {
 		keyFileName = fmt.Sprintf("client.%s.key", user)
 		certFileName = fmt.Sprintf("client.%s.crt", user)
 	case "node":
-		req = newNodeCSR(c.StringSlice("hosts"))
+		req = newNodeCSR(c.StringSlice("host"))
 		keyFileName = "node.key"
 		certFileName = "node.crt"
 	default:
