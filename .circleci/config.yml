@@ -1,0 +1,27 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: /go/src/github.com/utilitywarehouse/cockroach-cfssl-certs
+    docker:
+      - image: circleci/golang:1.10
+        environment:
+          UW_DOCKER_REGISTRY: registry.uw.systems
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 17.06.0-ce
+      - run: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s v1.10
+      - run: make install-packages
+      - run: ./bin/golangci-lint run --deadline=5m
+      - run: make docker-build
+      - run: docker login -u $DOCKER_ID -p $DOCKER_PASSWORD $UW_DOCKER_REGISTRY
+      - run: make docker-tag
+      - run: make docker-push
+
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - build:
+          context: org-global
