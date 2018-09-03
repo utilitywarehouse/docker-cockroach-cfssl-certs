@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -10,6 +9,8 @@ import (
 	"github.com/cloudflare/cfssl/csr"
 	"github.com/cloudflare/cfssl/log"
 	"github.com/urfave/cli"
+
+	"github.com/utilitywarehouse/docker-cockroach-tools/pkg/clitools"
 )
 
 var version = "replaced by `make static`"
@@ -19,7 +20,7 @@ var flags = []cli.Flag{
 		Name:   "type",
 		Value:  "client",
 		EnvVar: "CERTIFICATE_TYPE",
-		Usage:  "Certificate type: \"node\" or \"client\"",
+		Usage:  `Certificate type: "node" or "client"`,
 	},
 	cli.StringFlag{
 		Name:   "user",
@@ -53,22 +54,14 @@ var flags = []cli.Flag{
 	},
 }
 
-func checkRequired(c *cli.Context) error {
-	if c.String("ca-auth-key") == "" {
-		return errors.New(`"ca-auth-key" is required"`)
-	}
-	if c.String("ca-profile") == "" {
-		return errors.New(`"ca-profile" is required`)
-	}
-	if c.String("ca-address") == "" {
-		return errors.New(`"ca-address" is required`)
-	}
-
-	return nil
+var requiredFlags = []string{
+	"ca-auth-key",
+	"ca-profile",
+	"ca-address",
 }
 
 func action(c *cli.Context) error {
-	if err := checkRequired(c); err != nil {
+	if err := clitools.CheckRequired(c, requiredFlags); err != nil {
 		log.Fatal(err)
 	}
 

@@ -11,4 +11,11 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-cockroach-certs
+# Executables
+request-certs
+health-checker
+
+# Certificates and keys
+*.crt
+*.key
+*.pem
