@@ -34,15 +34,18 @@ info:
 # Local Setup Tasks
 # -
 
-install:
+install-tools:
 	go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 
 # -
 # Application Tasks
 # -
 
-install-packages:
-	go get ./...
+tidy:
+	go mod tidy
+
+install:
+	go get -d -v ./...
 
 lint:
 	golangci-lint run
