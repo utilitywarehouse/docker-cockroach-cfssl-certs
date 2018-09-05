@@ -1,7 +1,8 @@
-package main
+package internal
 
 import (
 	"encoding/json"
+
 	"github.com/cloudflare/cfssl/api/client"
 	"github.com/cloudflare/cfssl/auth"
 	"github.com/cloudflare/cfssl/cli/genkey"
