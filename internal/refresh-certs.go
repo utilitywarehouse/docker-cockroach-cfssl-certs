@@ -41,12 +41,7 @@ func loadLocalCert(c *cli.Context) ([]byte, error) {
 	}
 	defer file.Close()
 
-	cert, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return cert, nil
+	return ioutil.ReadAll(file)
 }
 
 func getCertificateExpirationTime(c *cli.Context, certData []byte) (expTime time.Time, err error) {
