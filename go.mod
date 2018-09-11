@@ -12,8 +12,8 @@ require (
 	github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936
 	github.com/pkg/errors v0.8.0
 	github.com/urfave/cli v1.20.0
-	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793 // indirect
-	golang.org/x/net v0.0.0-20180826012351-8a410e7b638d // indirect
+	golang.org/x/crypto v0.0.0-20180910181607-0e37d006457b // indirect
+	golang.org/x/net v0.0.0-20180906233101-161cd47e91fd // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
 	google.golang.org/appengine v1.1.0 // indirect
 )

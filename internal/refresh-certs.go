@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path"
 	"strings"
@@ -19,6 +20,7 @@ import (
 )
 
 var errProcessNotFound = errors.New("process not found")
+var errMaxSleepTimeTooBig = errors.New(`"max-sleep-time" must be smaller than "extra-time"`)
 
 func loadLocalCert(c *cli.Context) ([]byte, error) {
 	var certFileName string
@@ -81,6 +83,23 @@ func RefreshCertificates(c *cli.Context) error {
 		return errors.New(`"max-attempts" must be strictly larger than 0`)
 	}
 
+	var signal os.Signal
+	switch sig := c.String("signal"); sig {
+	case "SIGHUP":
+		signal = syscall.SIGHUP
+	case "SIGTERM":
+		signal = syscall.SIGTERM
+	case "SIGINT":
+		signal = syscall.SIGINT
+	default:
+		return fmt.Errorf(`"%s" is not an allowed signal`, sig)
+	}
+
+	maxSleepTime := c.Duration("random-sleep")
+	if maxSleepTime > c.Duration("extra-time") {
+		return errMaxSleepTimeTooBig
+	}
+
 	cert, err := loadLocalCert(c)
 	if err != nil {
 		return err
@@ -107,8 +126,12 @@ func RefreshCertificates(c *cli.Context) error {
 				attempts++
 				continue
 			}
-			// Send signal to target process
-			if err = targetProcess.Signal(syscall.SIGHUP); err != nil {
+			// Send signal to target process after random sleep
+			if maxSleepTime != 0 {
+				sleepTime := rand.Int63n(int64(maxSleepTime))
+				time.Sleep(time.Duration(sleepTime))
+			}
+			if err = targetProcess.Signal(signal); err != nil {
 				attempts++
 				continue
 			}
