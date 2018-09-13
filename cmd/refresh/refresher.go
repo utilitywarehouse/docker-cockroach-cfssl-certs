@@ -11,10 +11,12 @@ import (
 	"github.com/cloudflare/cfssl/log"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
+
 	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/internal"
 )
 
 var errMaxSleepTimeTooBig = errors.New(`"max-sleep-time" must be smaller than "extra-time"`)
+var errMaxNumberOfAttemptsReached = errors.New("reached maximum number of attempts")
 
 // Refresher is an object that reads and refreshes an ssl certificate when run
 type Refresher interface {
@@ -93,42 +95,59 @@ func (r *refresher) setCertExpTime(certData []byte) error {
 	return nil
 }
 
+func (r *refresher) fetchCerts(c *cli.Context) error {
+	for attempts := 0; attempts < r.maxAttempts; {
+		cert, err := internal.FetchAndSaveLocalCerts(c)
+		if err != nil {
+			log.Error(errors.Wrap(err, "failed fetching certificate"))
+			attempts++
+			continue
+		}
+
+		if err := r.setCertExpTime(cert); err != nil {
+			log.Error(errors.Wrap(err, "failed extracting exp time"))
+			attempts++
+			continue
+		}
+		return nil
+	}
+	return errMaxNumberOfAttemptsReached
+}
+
+func (r *refresher) sendSignal() error {
+	// Send signal to target process after random sleep
+	if r.maxSleepTime != 0 {
+		sleepTime := rand.Int63n(int64(r.maxSleepTime))
+		time.Sleep(time.Duration(sleepTime))
+	}
+
+	for attempts := 0; attempts < r.maxAttempts; {
+		if err := r.targetProcess.Signal(r.signal); err != nil {
+			log.Error(errors.Wrap(err, "failed sending signal"))
+			attempts++
+			continue
+		}
+		return nil
+	}
+	return errMaxNumberOfAttemptsReached
+}
+
 // Run starts a process that periodically checks certificate validity and
 // if it is close to expiring it requests a new one and notifies the main process
 func (r *refresher) Run(c *cli.Context) error {
-	var err error
-	var cert []byte
-	attempts := 0
-
-	for attempts < r.maxAttempts {
+	for {
 		if r.certExpTime.After(time.Now()) {
 			sleepTime := r.certExpTime.Sub(time.Now())
 			log.Infof("Cert Exp Time: %v, Sleeping for: %v", r.certExpTime, sleepTime)
 			time.Sleep(sleepTime)
 		} else {
 			log.Info("Requesting a new certificate.")
-			cert, err = internal.FetchAndSaveLocalCerts(c)
-			if err != nil {
-				attempts++
-				continue
+			if err := r.fetchCerts(c); err != nil {
+				return err
 			}
-			// Send signal to target process after random sleep
-			if r.maxSleepTime != 0 {
-				sleepTime := rand.Int63n(int64(r.maxSleepTime))
-				time.Sleep(time.Duration(sleepTime))
+			if err := r.sendSignal(); err != nil {
+				return err
 			}
-			if err = r.targetProcess.Signal(r.signal); err != nil {
-				attempts++
-				continue
-			}
-
-			if r.setCertExpTime(cert) != nil {
-				attempts++
-				continue
-			}
-			attempts = 0
 		}
 	}
-	return errors.Wrap(err, "reached maximum number of attempts")
-
 }

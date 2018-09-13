@@ -1,7 +1,6 @@
 package request
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,20 +26,14 @@ type Forwarder struct {
 }
 
 func (forwarder *Forwarder) writeError(writer http.ResponseWriter, message string) {
-	writer.Header().Set("Content-Type", "application/json")
+	log.Errorf("forward failed: %s", message)
+
+	writer.Header().Set("Content-Type", "text/plain")
 	writer.WriteHeader(http.StatusInternalServerError)
-	resp, err := json.Marshal(map[string]string{
-		"error": message,
-	})
 
+	_, err := writer.Write([]byte("Error: " + message))
 	if err != nil {
-		log.Error(errors.Wrap(err, "failed to create json error response"))
-		return
-	}
-
-	_, err = writer.Write(resp)
-	if err != nil {
-		log.Error(errors.Wrap(err, "failed to write response"))
+		log.Error("failed to write response to client")
 		return
 	}
 }
@@ -66,7 +59,11 @@ func (forwarder *Forwarder) ServeHTTP(writer http.ResponseWriter, request *http.
 		forwarder.writeError(writer, fmt.Sprintf("failed to forward the request: %v", err))
 		return
 	}
-	defer proxyRes.Body.Close()
+	defer func() {
+		if err = proxyRes.Body.Close(); err != nil {
+			log.Error(err)
+		}
+	}()
 
 	copyHeaders(proxyRes.Header, writer.Header())
 	writer.WriteHeader(proxyRes.StatusCode)

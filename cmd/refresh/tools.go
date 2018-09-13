@@ -2,13 +2,15 @@ package refresh
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-ps"
-	"github.com/pkg/errors"
-	"github.com/urfave/cli"
-	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/internal"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/mitchellh/go-ps"
+	"github.com/pkg/errors"
+	"github.com/urfave/cli"
+
+	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/internal"
 )
 
 var errProcessNotFound = errors.New("process not found")
@@ -28,13 +30,7 @@ func loadLocalCert(c *cli.Context) ([]byte, error) {
 	certsDir := c.GlobalString("certs-dir")
 	certFileName = path.Join(certsDir, certFileName)
 
-	file, err := os.Open(certFileName)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	return ioutil.ReadAll(file)
+	return ioutil.ReadFile(certFileName)
 }
 
 func getTargetProcess(c *cli.Context) (*os.Process, error) {
