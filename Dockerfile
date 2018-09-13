@@ -19,5 +19,7 @@ FROM alpine:3.8 AS runtime
 COPY --from=compile /build/cockroach-certs /bin/cockroach-certs
 COPY --from=compile /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
+EXPOSE 8000
+
 ENTRYPOINT ["cockroach-certs"]
 CMD ["--help"]

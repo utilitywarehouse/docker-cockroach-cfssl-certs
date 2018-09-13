@@ -1,10 +1,19 @@
 package refresh
 
 import (
+	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/cmd/global"
+	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/pkg/clitools"
 	"time"
 
 	"github.com/urfave/cli"
 )
+
+var Command = cli.Command{
+	Name:   "refresh",
+	Flags:  Flags,
+	Action: clitools.CheckGlobalRequired(refreshCertificates, global.RequiredFlags),
+	Usage:  "Periodically check and refresh certificates for cockroach node or client.",
+}
 
 var Flags = []cli.Flag{
 	cli.IntFlag{
@@ -41,4 +50,14 @@ var Flags = []cli.Flag{
 		Usage: "Maximum random sleep time before sending the signal to the main process. " +
 			"This is to prevent all containers being restarted at the same time.",
 	},
+}
+
+// refreshCertificates is a command that periodically checks and refreshes certificates.
+func refreshCertificates(c *cli.Context) error {
+	refresher, err := NewRefresher(c)
+	if err != nil {
+		return err
+	}
+
+	return refresher.Run(c)
 }

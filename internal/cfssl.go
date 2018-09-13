@@ -74,7 +74,8 @@ func createCertificateAndKey(
 	return key, cert, err
 }
 
-func getCACertificate(address string) (cert []byte, err error) {
+// GetCACertificate fetches the CA certificate
+func GetCACertificate(address string) (cert []byte, err error) {
 	req := new(info.Req)
 	reqJSON, err := json.Marshal(req)
 	if err != nil {
