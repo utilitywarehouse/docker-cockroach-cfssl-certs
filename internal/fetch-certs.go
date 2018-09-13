@@ -9,9 +9,11 @@ import (
 	"github.com/urfave/cli"
 )
 
-const unknownCertTypeErrorTemplate = `unknown certificate type "%s", allowed values are "client" and "node"`
+// UnknownCertTypeErrorTemplate is a string template for unknown certificate type error
+const UnknownCertTypeErrorTemplate = `unknown certificate type "%s", allowed values are "client" and "node"`
 
-func fetchAndSaveLocalCerts(c *cli.Context) ([]byte, error) {
+// FetchAndSaveLocalCerts fetches and saves certificate for a node or a client.
+func FetchAndSaveLocalCerts(c *cli.Context) ([]byte, error) {
 	var req *csr.CertificateRequest
 	var keyFileName, certFileName string
 
@@ -26,7 +28,7 @@ func fetchAndSaveLocalCerts(c *cli.Context) ([]byte, error) {
 		keyFileName = "node.key"
 		certFileName = "node.crt"
 	default:
-		return nil, fmt.Errorf(unknownCertTypeErrorTemplate, certificateType)
+		return nil, fmt.Errorf(UnknownCertTypeErrorTemplate, certificateType)
 	}
 
 	key, cert, err := createCertificateAndKey(
@@ -47,20 +49,4 @@ func fetchAndSaveLocalCerts(c *cli.Context) ([]byte, error) {
 		return cert, err
 	}
 	return cert, ioutil.WriteFile(certFileName, cert, 0600)
-}
-
-// FetchAndSaveCerts is a command that fetches certificates from the CA and saves them to disk.
-func FetchAndSaveCerts(c *cli.Context) error {
-	caCert, err := getCACertificate(c.GlobalString("ca-address"))
-	if err != nil {
-		return err
-	}
-
-	caFileName := path.Join(c.GlobalString("certs-dir"), "ca.crt")
-	if err = ioutil.WriteFile(caFileName, caCert, 0600); err != nil {
-		return err
-	}
-
-	_, err = fetchAndSaveLocalCerts(c)
-	return err
 }
