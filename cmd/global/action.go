@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/urfave/cli"
+
 	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/internal"
 )
 

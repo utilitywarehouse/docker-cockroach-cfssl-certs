@@ -1,11 +1,12 @@
 package refresh
 
 import (
-	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/cmd/global"
-	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/pkg/clitools"
 	"time"
 
 	"github.com/urfave/cli"
+
+	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/cmd/global"
+	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/pkg/clitools"
 )
 
 var Command = cli.Command{

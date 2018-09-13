@@ -3,16 +3,16 @@ package refreshandforward
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/cloudflare/cfssl/log"
-	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/cmd/global"
-	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/pkg/clitools"
 	"net/http"
 	"time"
 
+	"github.com/cloudflare/cfssl/log"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 
+	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/cmd/global"
 	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/cmd/refresh"
+	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/pkg/clitools"
 	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/pkg/request"
 )
 
