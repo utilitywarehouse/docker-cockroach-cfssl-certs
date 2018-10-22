@@ -29,9 +29,9 @@ type refresher struct {
 	extraTime   time.Duration // Duration to be subtracted from the  actual certificate expiration time
 	certExpTime time.Time     // Actual certificate expiry time minus `extraTime`
 
-	maxSleepTime  time.Duration // Maximum length of random sleep before sending signal
-	signal        os.Signal
-	targetProcess *os.Process
+	maxSleepTime      time.Duration // Maximum length of random sleep before sending signal
+	signal            os.Signal
+	targetCommandName string
 }
 
 // NewRefresher returns a new instance of a Refresher or an error
@@ -40,8 +40,9 @@ func NewRefresher(c *cli.Context) (Refresher, error) {
 	conf := &refresher{
 		maxAttempts: c.Int("max-attempts"),
 
-		extraTime:    c.Duration("extra-time"),
-		maxSleepTime: c.Duration("random-sleep"),
+		extraTime:         c.Duration("extra-time"),
+		maxSleepTime:      c.Duration("random-sleep"),
+		targetCommandName: c.String("target-proc-command"),
 	}
 
 	if conf.maxAttempts <= 0 {
@@ -72,8 +73,7 @@ func NewRefresher(c *cli.Context) (Refresher, error) {
 		return nil, err
 	}
 
-	conf.targetProcess, err = getTargetProcess(c)
-	if err != nil {
+	if _, err = getTargetProcess(conf.targetCommandName); err != nil {
 		return nil, err
 	}
 
@@ -121,8 +121,13 @@ func (r *refresher) sendSignal() error {
 		time.Sleep(time.Duration(sleepTime))
 	}
 
+	process, err := getTargetProcess(r.targetCommandName)
+	if err != nil {
+		return err
+	}
+
 	for attempts := 0; attempts < r.maxAttempts; {
-		if err := r.targetProcess.Signal(r.signal); err != nil {
+		if err := process.Signal(r.signal); err != nil {
 			log.Error(errors.Wrap(err, "failed sending signal"))
 			attempts++
 			continue

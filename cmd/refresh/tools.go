@@ -33,15 +33,14 @@ func loadLocalCert(c *cli.Context) ([]byte, error) {
 	return ioutil.ReadFile(certFileName)
 }
 
-func getTargetProcess(c *cli.Context) (*os.Process, error) {
+func getTargetProcess(commandName string) (*os.Process, error) {
 	processes, err := ps.Processes()
 	if err != nil {
 		return nil, err
 	}
 
-	command := c.String("target-proc-command")
 	for _, p := range processes {
-		if p.Executable() == command {
+		if p.Executable() == commandName {
 			return os.FindProcess(p.Pid())
 		}
 
