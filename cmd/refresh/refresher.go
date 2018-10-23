@@ -126,15 +126,10 @@ func (r *refresher) sendSignal() error {
 		return err
 	}
 
-	for attempts := 0; attempts < r.maxAttempts; {
-		if err := process.Signal(r.signal); err != nil {
-			log.Error(errors.Wrap(err, "failed sending signal"))
-			attempts++
-			continue
-		}
-		return nil
+	if err := process.Signal(r.signal); err != nil {
+		return errors.Wrap(err, "failed sending signal")
 	}
-	return errMaxNumberOfAttemptsReached
+	return nil
 }
 
 // Run starts a process that periodically checks certificate validity and
