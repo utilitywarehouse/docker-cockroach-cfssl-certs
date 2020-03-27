@@ -1,5 +1,7 @@
 module github.com/utilitywarehouse/docker-cockroach-cfssl-certs
 
+go 1.14
+
 require (
 	github.com/cloudflare/cfssl v0.0.0-20180829183926-33259b0d2131
 	github.com/go-sql-driver/mysql v1.4.0 // indirect

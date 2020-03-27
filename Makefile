@@ -74,7 +74,7 @@ docker-tag:
 	docker tag $(DOCKER_IMAGE_NAME):$(CIRCLE_SHA1) $(DOCKER_IMAGE_NAME):$(DOCKER_TAG)
 
 docker-push:
-	docker push $(DOCKER_IMAGE_NAME)
+	docker push $(DOCKER_IMAGE_NAME):$(CIRCLE_SHA1)
 
 docker-run:
 	docker run --env-file=.env $(DOCKER_IMAGE_NAME):$(CIRCLE_SHA1)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/mitchellh/go-ps"
 	"github.com/pkg/errors"
+	"github.com/cloudflare/cfssl/log"
 	"github.com/urfave/cli"
 
 	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/internal"
@@ -41,6 +42,7 @@ func getTargetProcess(commandName string) (*os.Process, error) {
 
 	for _, p := range processes {
 		if p.Executable() == commandName {
+			log.Infof("%s does not match %s", p.Executable(), commandName)
 			return os.FindProcess(p.Pid())
 		}
 
