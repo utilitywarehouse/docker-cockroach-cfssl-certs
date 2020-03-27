@@ -42,8 +42,9 @@ func getTargetProcess(commandName string) (*os.Process, error) {
 
 	for _, p := range processes {
 		if p.Executable() == commandName {
-			log.Infof("%s does not match %s", p.Executable(), commandName)
 			return os.FindProcess(p.Pid())
+		} else {
+			log.Infof("%s does not match %s", p.Executable(), commandName)
 		}
 
 	}
