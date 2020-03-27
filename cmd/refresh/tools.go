@@ -6,9 +6,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/cloudflare/cfssl/log"
 	"github.com/mitchellh/go-ps"
 	"github.com/pkg/errors"
-	"github.com/cloudflare/cfssl/log"
 	"github.com/urfave/cli"
 
 	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/internal"
