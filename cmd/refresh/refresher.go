@@ -29,9 +29,13 @@ type refresher struct {
 	extraTime   time.Duration // Duration to be subtracted from the  actual certificate expiration time
 	certExpTime time.Time     // Actual certificate expiry time minus `extraTime`
 
-	maxSleepTime      time.Duration // Maximum length of random sleep before sending signal
-	signal            os.Signal
-	targetCommandName string
+	process *signalProcess
+}
+
+type signalProcess struct {
+	maxSleepTime time.Duration // Maximum length of random sleep before sending signal
+	signal       os.Signal
+	commandName  string
 }
 
 // NewRefresher returns a new instance of a Refresher or an error
@@ -39,29 +43,11 @@ type refresher struct {
 func NewRefresher(c *cli.Context) (Refresher, error) {
 	conf := &refresher{
 		maxAttempts: c.Int("max-attempts"),
-
-		extraTime:         c.Duration("extra-time"),
-		maxSleepTime:      c.Duration("random-sleep"),
-		targetCommandName: c.String("target-proc-command"),
+		extraTime:   c.Duration("extra-time"),
 	}
 
 	if conf.maxAttempts <= 0 {
 		return nil, errors.New(`"max-attempts" must be strictly larger than 0`)
-	}
-
-	if conf.maxSleepTime > conf.extraTime {
-		return nil, errMaxSleepTimeTooBig
-	}
-
-	switch sig := c.String("signal"); sig {
-	case "SIGHUP":
-		conf.signal = syscall.SIGHUP
-	case "SIGTERM":
-		conf.signal = syscall.SIGTERM
-	case "SIGINT":
-		conf.signal = syscall.SIGINT
-	default:
-		return nil, errors.Errorf(`"%s" is not an allowed signal`, sig)
 	}
 
 	cert, err := loadLocalCert(c)
@@ -73,8 +59,32 @@ func NewRefresher(c *cli.Context) (Refresher, error) {
 		return nil, err
 	}
 
-	if _, err = getTargetProcess(conf.targetCommandName); err != nil {
-		return nil, err
+	if cmd := c.String("target-proc-command"); cmd != "" {
+		target := &signalProcess{
+			maxSleepTime: c.Duration("random-sleep"),
+			commandName:  c.String("target-proc-command"),
+		}
+
+		if target.maxSleepTime > conf.extraTime {
+			return nil, errMaxSleepTimeTooBig
+		}
+
+		switch sig := c.String("signal"); sig {
+		case "SIGHUP":
+			target.signal = syscall.SIGHUP
+		case "SIGTERM":
+			target.signal = syscall.SIGTERM
+		case "SIGINT":
+			target.signal = syscall.SIGINT
+		default:
+			return nil, errors.Errorf(`"%s" is not an allowed signal`, sig)
+		}
+
+		if _, err = getTargetProcess(target.commandName); err != nil {
+			return nil, err
+		}
+
+		conf.process = target
 	}
 
 	return conf, nil
@@ -115,18 +125,23 @@ func (r *refresher) fetchCerts(c *cli.Context) error {
 }
 
 func (r *refresher) sendSignal() error {
+	if r.process == nil {
+		log.Info("no process to signal, skipping")
+		return nil
+	}
+
 	// Send signal to target process after random sleep
-	if r.maxSleepTime != 0 {
-		sleepTime := rand.Int63n(int64(r.maxSleepTime))
+	if r.process.maxSleepTime != 0 {
+		sleepTime := rand.Int63n(int64(r.process.maxSleepTime))
 		time.Sleep(time.Duration(sleepTime))
 	}
 
-	process, err := getTargetProcess(r.targetCommandName)
+	process, err := getTargetProcess(r.process.commandName)
 	if err != nil {
 		return err
 	}
 
-	if err := process.Signal(r.signal); err != nil {
+	if err := process.Signal(r.process.signal); err != nil {
 		return errors.Wrap(err, "failed sending signal")
 	}
 	return nil
