@@ -1,20 +1,13 @@
-# -
-# Build workspace
-# -
-FROM golang:1.11 AS compile
-
-RUN apt-get update -y && \
-    apt-get install --no-install-recommends -y -q build-essential ca-certificates
+FROM golang:1.20-alpine AS compile
 
 WORKDIR /build
-ADD . .
-RUN make install
-RUN make static
+COPY . .
+RUN apk --no-cache add git \
+      && go get -d -v ./... \
+      && go generate \
+      && CGO_ENABLED=0 go build -o=cockroach-certs .
 
-# -
-# Runtime
-# -
-FROM alpine:3.8 AS runtime
+FROM alpine:3.17 AS runtime
 
 COPY --from=compile /build/cockroach-certs /bin/cockroach-certs
 COPY --from=compile /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
