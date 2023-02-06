@@ -1,5 +1,5 @@
-# cockroach-cfssl-certs [![CircleCI](https://circleci.com/gh/utilitywarehouse/docker-cockroach-cfssl-certs.svg?style=svg&circle-token=d220b3fb97a38ee8321d564e9e4443dd858650c5)](https://circleci.com/gh/utilitywarehouse/docker-cockroach-cfssl-certs)
-Utility to get ssl certificates for cockroach nodes and clients from cfssl CA.
+# cockroach-cfssl-certs 
+Utility to get TLS certificates for cockroach nodes and clients from cfssl CA.
 It is inspired by a similar tool that uses Kubernetes CA from
 [cockroach](https://github.com/cockroachdb/k8s/tree/master/request-cert).
 

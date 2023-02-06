@@ -17,7 +17,7 @@ import (
 func newClientCSR(user string) *csr.CertificateRequest {
 	return &csr.CertificateRequest{
 		CN:         user,
-		KeyRequest: csr.NewBasicKeyRequest(),
+		KeyRequest: csr.NewKeyRequest(),
 	}
 }
 
@@ -25,7 +25,7 @@ func newNodeCSR(hosts []string) *csr.CertificateRequest {
 	return &csr.CertificateRequest{
 		CN:         "node",
 		Hosts:      hosts,
-		KeyRequest: csr.NewBasicKeyRequest(),
+		KeyRequest: csr.NewKeyRequest(),
 	}
 }
 

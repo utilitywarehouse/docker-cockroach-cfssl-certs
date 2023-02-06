@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"os"
 
 	"github.com/cloudflare/cfssl/log"
@@ -12,7 +13,9 @@ import (
 	"github.com/utilitywarehouse/docker-cockroach-cfssl-certs/pkg/clitools"
 )
 
-var version = "replaced by `make static`"
+//go:generate sh get_version
+//go:embed version.txt
+var version string
 
 func main() {
 	app := cli.NewApp()
