@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY: quay.io
-  IMAGE_NAME: cockroach-cfssl-certs
+  IMAGE_NAME: utilitywarehouse/cockroach-cfssl-certs
 
 jobs:
   docker:
