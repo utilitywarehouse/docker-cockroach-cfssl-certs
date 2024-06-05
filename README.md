@@ -1,5 +1,5 @@
 # DEPRECATED
-We have replaced `cfssl` with `cert-manager` for CockroachDB certificates. Please refer to [utilitywarehouse/cockroachdb-manifests](https://github.com/utilitywarehouse/cockroachdb-manifests) repository for the up-to-date guides and manifests.
+This is no longer recommended way to deploy CockroachDB, please see [utilitywarehouse/cockroachdb-manifests](https://github.com/utilitywarehouse/cockroachdb-manifests) for the latest recommended deployment.
 
 # cockroach-cfssl-certs 
 Utility to get TLS certificates for cockroach nodes and clients from cfssl CA.
