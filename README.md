@@ -1,3 +1,6 @@
+# DEPRECATED
+This is no longer recommended way to deploy CockroachDB, please see [utilitywarehouse/cockroachdb-manifests](https://github.com/utilitywarehouse/cockroachdb-manifests) for the latest recommended deployment.
+
 # cockroach-cfssl-certs 
 Utility to get TLS certificates for cockroach nodes and clients from cfssl CA.
 It is inspired by a similar tool that uses Kubernetes CA from
